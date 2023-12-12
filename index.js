@@ -13,66 +13,38 @@ window.onload = function () {
 
   document.body.appendChild(app.view);
 
-  // Player Object
-  player = PIXI.Sprite.from("/images/player.png");
-  player.anchor.set(0.5);
-  player.x = app.view.width / 2;
-  player.y = app.view.height / 2;
-  app.stage.addChild(player);
+  // preload assets
+  let baseUrl = "/images/";
+  //app.loader.add("sprite01", baseUrl + "bloat01.png");
 
-  // mouse interactions
-  app.stage.interactive = true;
-  app.stage.on("pointermove", movePlayer);
+  let assetPaths = [];
+  for (let i = 1; i < 10; i++) {
+    const alias = "sprite0" + i;
+    PIXI.Assets.add(alias, baseUrl + "bloat0" + i + ".png");
+    assetPaths.push(alias);
+  }
+  PIXI.Assets.add("sprite10", baseUrl + "bloat10.png");
+  PIXI.Assets.add("player", baseUrl + "player.png");
+  assetPaths.push("sprite10");
+  assetPaths.push("player");
 
-  // Keyboard interactions
-  window.addEventListener("keydown", keysDown);
-  window.addEventListener("keyup", keysUp);
+  const texturesPromise = PIXI.Assets.load(assetPaths);
 
-  // ticker
-  app.ticker.add(gameLoop);
-  keysDiv = document.querySelector("#keys");
+  texturesPromise.then((textures) => {
+    // create a new Sprite from the resolved loaded Textures
+
+    const sprite01 = PIXI.Sprite.from(textures.sprite01);
+
+    sprite01.anchor.set(0.5);
+    sprite01.x = app.screen.width * 0.25;
+    sprite01.y = app.screen.height / 2;
+    app.stage.addChild(sprite01);
+
+    const sprite02 = PIXI.Sprite.from(textures.sprite02);
+
+    sprite02.anchor.set(0.5);
+    sprite02.x = app.screen.width * 0.75;
+    sprite02.y = app.screen.height / 2;
+    app.stage.addChild(sprite02);
+  });
 };
-
-function movePlayer(e) {
-  let pos = e.data.global;
-  console.log(pos);
-
-  player.x = pos.x;
-  player.y = pos.y;
-}
-
-function keysDown(e) {
-  keys[e.keyCode] = true;
-}
-
-function keysUp(e) {
-  keys[e.keyCode] = false;
-}
-
-function gameLoop() {
-  keysDiv.innerHTML = JSON.stringify(keys);
-
-  // W & up arrow
-  if (keys["87"] || keys["38"]) {
-    console.log("W");
-    player.y = player.y - 5;
-  }
-
-  // S & down arrow
-  if (keys["83"] || keys["40"]) {
-    console.log("S");
-    player.y = player.y + 5;
-  }
-
-  // A & left arrow
-  if (keys["65"] || keys["37"]) {
-    console.log("A");
-    player.x = player.x - 5;
-  }
-
-  // D & right arrow
-  if (keys["68"] || keys["39"]) {
-    console.log("D");
-    player.x = player.x + 5;
-  }
-}
